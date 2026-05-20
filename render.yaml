@@ -5,6 +5,8 @@ services:
     name: aegis-bank-api
     runtime: docker
     plan: free
+    # Build from inside the backend/ folder so COPY paths in the Dockerfile resolve.
+    dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: SPRING_PROFILES_ACTIVE
@@ -25,7 +27,6 @@ services:
           property: password
       - key: FRONTEND_ORIGIN
         sync: false                   # set this to your Vercel URL after deploying frontend
-
 databases:
   - name: aegis-bank-db
     plan: free
