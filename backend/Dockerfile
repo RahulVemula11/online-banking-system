@@ -1,14 +1,15 @@
 # ---- Stage 1: build the jar ----
-FROM eclipse-temurin:17-jdk AS build
+# Use a Maven image directly — no wrapper needed, totally reliable on any CI/host.
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-# Download dependencies first (cached layer)
-RUN chmod +x mvnw && ./mvnw dependency:go-offline -B || true
+# Copy the build descriptor first and pre-fetch dependencies (cached layer)
+COPY pom.xml ./
+RUN mvn -B dependency:go-offline
+# Now copy the source and build
 COPY src ./src
-RUN ./mvnw clean package -DskipTests -B
+RUN mvn -B clean package -DskipTests
 
-# ---- Stage 2: run ----
+# ---- Stage 2: run (small JRE image) ----
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
