@@ -1,0 +1,25 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Apache Maven Wrapper startup script (simplified, self-bootstrapping)
+# ----------------------------------------------------------------------------
+set -e
+WRAPPER_DIR="$(cd "$(dirname "$0")" && pwd)/.mvn/wrapper"
+WRAPPER_JAR="$WRAPPER_DIR/maven-wrapper.jar"
+WRAPPER_PROPS="$WRAPPER_DIR/maven-wrapper.properties"
+
+if [ ! -f "$WRAPPER_JAR" ]; then
+  WRAPPER_URL=$(grep '^wrapperUrl=' "$WRAPPER_PROPS" | cut -d= -f2-)
+  echo "Downloading Maven Wrapper from $WRAPPER_URL"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL -o "$WRAPPER_JAR" "$WRAPPER_URL"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q -O "$WRAPPER_JAR" "$WRAPPER_URL"
+  else
+    echo "ERROR: need curl or wget to bootstrap the Maven wrapper." >&2
+    exit 1
+  fi
+fi
+
+exec java -classpath "$WRAPPER_JAR" \
+  -Dmaven.multiModuleProjectDirectory="$(cd "$(dirname "$0")" && pwd)" \
+  org.apache.maven.wrapper.MavenWrapperMain "$@"
