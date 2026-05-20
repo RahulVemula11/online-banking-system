@@ -1,32 +1,24 @@
 # Render.com Blueprint — provisions the Spring Boot backend + a free Postgres DB.
-# In Render: New > Blueprint > point at this repo. Render reads this file.
 services:
   - type: web
     name: aegis-bank-api
     runtime: docker
     plan: free
-    # Build from inside the backend/ folder so COPY paths in the Dockerfile resolve.
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: JWT_SECRET
-        generateValue: true          # Render generates a strong secret
-      - key: JDBC_DATABASE_URL
+        generateValue: true
+      # Give the entrypoint script the RAW connection string (postgresql://...).
+      # The script converts it into the jdbc: form + splits out user/password.
+      - key: DATABASE_URL
         fromDatabase:
           name: aegis-bank-db
           property: connectionString
-      - key: DB_USERNAME
-        fromDatabase:
-          name: aegis-bank-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: aegis-bank-db
-          property: password
       - key: FRONTEND_ORIGIN
-        sync: false                   # set this to your Vercel URL after deploying frontend
+        sync: false
 databases:
   - name: aegis-bank-db
     plan: free
